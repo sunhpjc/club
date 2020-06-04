@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shp.web.admin.dao.ClubDao">
+    <sql id="clubClumn">
+        club_id AS clubId,
+        name,
+        email,
+        logo,
+        club_desc AS clubDesc,
+        foundtime,
+        founder,
+        star,
+        club_status AS clubStatus,
+        club_type AS clubType,
+        createtime,
+        updatetime
+    </sql>
+    <!--多条件搜索-->
+    <!--dataTableSearch 使用表明.列名，因为传入参数是Map，社团信息包含在里面-->
+    <select id="dataTableSearch" resultType="com.shp.domain.Club" parameterType="java.util.Map">
+        select
+        <include refid="clubClumn"/>
+        from clubs AS c
+        <where>
+            c.club_status=1 AND c.club_type=1
+            <if test="club.name != null and club.name != ''">
+                AND c.name LIKE concat('%',#{club.name},'%')
+            </if>
+        </where>
+        ORDER BY c.club_id ASC
+        LIMIT #{start},#{length}
+    </select>
+    <!--查询数据总数-->
+    <select id="dataTableCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        clubs AS c
+        <where>
+            c.club_status=1 AND c.club_type=1
+            <if test="name != null and name != ''">
+                AND c.name LIKE concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+    <!--通过id查询社团-->
+    <select id="getClubById" resultType="com.shp.domain.Club">
+        SELECT
+        <include refid="clubClumn"></include>
+        FROM
+        clubs AS c
+        WHERE c.club_id = #{clubId}
+    </select>
+    <!--添加社团-->
+    <insert id="save">
+        INSERT INTO clubs (
+            name,
+            email,
+            club_desc,
+            foundtime,
+            founder,
+            star,
+            club_status,
+            club_type
+        )
+        VALUES
+            (#{name},#{email},#{clubDesc},#{foundtime},#{founder},1,1,1)
+    </insert>
+    <!--删除(批量更新状态)-->
+    <update id="deleteMulti">
+        UPDATE
+        clubs
+        SET
+        club_status = 0
+        WHERE club_id IN
+        <foreach collection="array" open="(" close=")" separator="," item="clubId">
+            #{clubId}
+        </foreach>
+    </update>
+    <!--修改-->
+    <update id="update">
+        UPDATE
+          clubs AS c
+        SET
+          c.name = #{name},
+          c.email = #{email},
+          c.club_desc = #{clubDesc},
+          c.founder = #{founder},
+          c.foundtime = #{foundtime}
+        WHERE club_id = #{clubId}
+    </update>
+
+
+    <!--社团一览-->
+    <select id="selectClubAll" resultType="com.shp.domain.Club">
+        SELECT
+          c.club_id AS clubId,
+          c.name,
+          c.star
+        FROM
+          clubs AS c
+        WHERE c.club_type = 1 AND c.club_staus = 1
+        LIMIT #{start},#{length}
+    </select>
+    <insert id="saveClubUser">
+        INSERT INTO user_club (
+            club_id,
+            user_id
+        )
+        VALUES
+            (#{0},#{1})
+    </insert>
+</mapper>

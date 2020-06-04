@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shp.web.admin.dao.NewsDao">
+    <sql id="newsClumn">
+        n.news_id AS newsId,
+        c.club_id AS clubId,
+        c.name,
+        n.news_title AS newsTitle,
+        n.news_content AS newsContent,
+        n.createtime,
+        n.updatetime
+    </sql>
+
+    <!--多条件搜索-->
+    <!--dataTableSearch 使用表明.列名，因为传入参数是Map，社团信息包含在里面-->
+    <select id="dataTableSearch" resultType="com.shp.domain.News" parameterType="java.util.Map">
+        SELECT
+        <include refid="newsClumn"/>
+        FROM
+        news AS n
+        LEFT JOIN clubs AS c
+        ON n.club_id = c.club_id
+        <where>
+            <if test="news.newsTitle != null and news.newsTitle != ''">
+                n.news_title LIKE concat('%',#{news.newsTitle},'%')
+            </if>
+            and n.news_status =1
+        </where>
+        ORDER BY n.createtime DESC
+        LIMIT #{start},#{length}
+    </select>
+    <!--查询数据总数-->
+    <select id="dataTableCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        news AS n
+        LEFT JOIN clubs AS c
+        ON n.club_id = c.club_id
+        <where>
+            <if test="newsTitle != null and newsTitle != ''">
+                n.news_title LIKE concat('%',#{newsTitle},'%')
+            </if>
+            and n.news_status =1
+        </where>
+    </select>
+    <!--通过id查询-->
+    <select id="getById" resultType="com.shp.domain.News">
+        SELECT
+        <include refid="newsClumn"/>
+        FROM
+        news AS n
+        LEFT JOIN clubs AS c
+        ON n.club_id = c.club_id
+        where news_id = #{id} and n.news_status =1
+    </select>
+    <!--删除-->
+    <delete id="deleteMulti">
+        update
+        news
+        set news_status = 0
+        WHERE news_id IN
+        <foreach collection="array" open="(" close=")" separator="," item="newsId">
+            #{newsId}
+        </foreach>
+    </delete>
+
+
+    <select id="selectCount" resultType="com.shp.web.admin.vo.CountNewsVo">
+        SELECT
+          n.club_id AS clubId,
+          COUNT(*) AS countNews
+        FROM
+          news AS n
+        GROUP BY n.club_id
+    </select>
+
+
+    <!--添加新闻-->
+    <insert id="saveNews">
+        insert into news
+        (club_id,news_title, news_content, news_status)
+        values (#{clubId},#{newsTitle},#{newsContent},#{newsStatus})
+    </insert>
+
+    <select id="dataTableSearch1" resultType="com.shp.domain.News">
+        SELECT
+        <include refid="newsClumn"/>
+        FROM
+        news AS n
+        LEFT JOIN clubs AS c
+        ON n.club_id = c.club_id
+        <where>
+            <if test="news.newsTitle != null and news.newsTitle != ''">
+                n.news_title LIKE concat('%',#{news.newsTitle},'%')
+            </if>
+            <if test="news.clubId != null and news.clubId != ''">
+                and n.club_id = #{news.clubId}
+            </if>
+            and n.news_status = 1
+        </where>
+        ORDER BY n.createtime DESC
+        LIMIT #{start},#{length}
+    </select>
+    <select id="dataTableCount1" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        news AS n
+        LEFT JOIN clubs AS c
+        ON n.club_id = c.club_id
+        <where>
+            <if test="newsTitle != null and newsTitle != ''">
+                n.news_title LIKE concat('%',#{newsTitle},'%')
+            </if>
+            <if test="clubId != null and clubId != ''">
+                and n.club_id = #{clubId}
+            </if>
+            and n.news_status = 1
+        </where>
+    </select>
+
+</mapper>

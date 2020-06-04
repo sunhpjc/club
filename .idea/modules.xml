@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/MyClub-RELEASE.iml" filepath="$PROJECT_DIR$/.idea/MyClub-RELEASE.iml" />
+      <module fileurl="file://$PROJECT_DIR$/commons/commons.iml" filepath="$PROJECT_DIR$/commons/commons.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dependencies/dependencies.iml" filepath="$PROJECT_DIR$/dependencies/dependencies.iml" />
+      <module fileurl="file://$PROJECT_DIR$/domain/domain.iml" filepath="$PROJECT_DIR$/domain/domain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web-admin/web-admin.iml" filepath="$PROJECT_DIR$/web-admin/web-admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/web-ui/web-ui.iml" filepath="$PROJECT_DIR$/web-ui/web-ui.iml" />
+    </modules>
+  </component>
+</project>

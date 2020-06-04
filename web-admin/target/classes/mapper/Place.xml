@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shp.web.admin.dao.PlaceDao">
+    <sql id="place">
+        place_id AS placeId,
+        name,
+        place_status AS placeStatus,
+        createtime,
+        updatetime
+    </sql>
+    <!--通过状态查询-->
+    <select id="getByStatus" resultType="com.shp.domain.Place">
+        SELECT
+        <include refid="place"/>
+        FROM places
+        WHERE place_status = 0
+    </select>
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shp.web.admin.dao.GroupApplicationDao">
+    <sql id="groupApplicationClumn">
+        g.group_application_id AS groupApplicationId,
+        a.activity_id AS activityId,
+        a.name AS activityName,
+        a.time As activityTime,
+        a.place AS activityPlace,
+        a.content AS activityContent,
+        c.club_id AS clubId,
+        c.name AS clubName,
+        p.place_id AS placeId,
+        p.name AS placeName,
+        p.place_status AS placeStatus,
+        g.group_application_type AS groupApplicationType,
+        g.group_application_desc AS groupApplicationDesc,
+        g.group_application_status AS groupApplicationStatus,
+        g.createtime AS gcreatetime,
+        g.updatetime AS gupdatetime
+    </sql>
+
+    <!--多条件搜索-->
+    <!--dataTableSearch 使用表明.列名，因为传入参数是Map，社团信息包含在里面-->
+    <select id="dataTableSearch" resultType="com.shp.domain.GroupApplications" parameterType="java.util.Map">
+        SELECT
+        <include refid="groupApplicationClumn"/>
+        FROM
+        group_applications AS g
+        LEFT JOIN activities AS a
+        ON g.activity_id = a.activity_id
+        LEFT JOIN clubs AS c
+        ON a.club_id = c.club_id
+        LEFT JOIN places AS p
+        ON a.place_id=p.place_id
+        <where>
+            <if test="groupApplications.clubName != null and groupApplications.clubName != ''">
+                c.name LIKE concat('%',#{groupApplications.clubName},'%')
+            </if>
+        </where>
+        ORDER BY g.group_application_status DESC,g.createtime DESC
+        LIMIT #{start},#{length}
+    </select>
+    <!--查询数据总数-->
+    <select id="dataTableCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        group_applications AS g
+        LEFT JOIN activities AS a
+        ON g.activity_id = a.activity_id
+        LEFT JOIN clubs AS c
+        ON a.club_id = c.club_id
+        LEFT JOIN places AS p
+        ON a.place_id=p.place_id
+        <where>
+            <if test="clubName != null and clubName != ''">
+                c.name LIKE concat('%',#{clubName},'%')
+            </if>
+        </where>
+        <!--<where>
+            c.club_status=1 AND c.club_type=1
+            <if test="name != null and name != ''">
+                AND c.name LIKE concat('%',#{name},'%')
+            </if>
+        </where>-->
+    </select>
+    <!--通过id查询-->
+    <select id="getById" resultType="com.shp.domain.GroupApplications">
+        SELECT
+        <include refid="groupApplicationClumn"></include>
+        FROM
+        group_applications AS g
+        LEFT JOIN activities AS a
+        ON g.activity_id = a.activity_id
+        LEFT JOIN clubs AS c
+        ON a.club_id = c.club_id
+        LEFT JOIN places AS p
+        ON a.place_id=p.place_id
+        WHERE g.group_application_id = #{groupApplicationId}
+    </select>
+    <!--通过申请-->
+    <update id="applicationPass">
+        UPDATE
+          group_applications
+        SET
+          group_application_status = 1
+        WHERE group_application_id = #{groupApplicationId}
+    </update>
+    <!--拒绝申请-->
+    <update id="applicationRefuse">
+        UPDATE
+          group_applications
+        SET
+          group_application_status = 0
+        WHERE group_application_id = #{groupApplicationId}
+    </update>
+
+    <!--删除(社团管理员)-->
+    <delete id="deleteMulti">
+        DELETE
+        FROM group_applications
+        WHERE activity_id IN
+        <foreach collection="array" open="(" close=")" separator="," item="activityId">
+            #{activityId}
+        </foreach>
+    </delete>
+    <!--社团管理员插入数据-->
+    <insert id="insert">
+        INSERT INTO group_applications(activity_id, group_application_type, group_application_status)
+        VALUES (
+        #{activityId},0,2
+        )
+    </insert>
+</mapper>

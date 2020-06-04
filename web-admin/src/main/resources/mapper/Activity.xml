@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shp.web.admin.dao.ActivityDao">
+
+    <select id="selectCount" resultType="com.shp.web.admin.vo.CountActivityVo">
+        SELECT
+          a.club_id AS clubId,
+          COUNT(*) AS countActivity
+        FROM
+          activities AS a
+        GROUP BY a.club_id
+    </select>
+
+    <sql id="groupApplicationClumn">
+        g.group_application_id AS groupApplicationId,
+        a.activity_id AS activityId,
+        a.name AS activityName,
+        a.time As activityTime,
+        a.place AS activityPlace,
+        a.content AS activityContent,
+        c.club_id AS clubId,
+        c.name AS clubName,
+        p.place_id AS placeId,
+        p.name AS placeName,
+        p.place_status AS placeStatus,
+        g.group_application_type AS groupApplicationType,
+        g.group_application_desc AS groupApplicationDesc,
+        g.group_application_status AS groupApplicationStatus,
+        g.createtime AS gcreatetime,
+        g.updatetime AS gupdatetime
+    </sql>
+    <sql id="activityClumn">
+        activity_id AS activityId,
+        place_id AS placeId,
+        club_id AS clubId,
+        name,
+        time,
+        place,
+        content,
+        createtime,
+        updatetime
+    </sql>
+    <!--多条件搜索-->
+    <!--dataTableSearch 使用表明.列名，因为传入参数是Map，社团信息包含在里面-->
+    <select id="dataTableSearch" resultType="com.shp.domain.GroupApplications" parameterType="java.util.Map">
+        SELECT
+        <include refid="groupApplicationClumn"/>
+        FROM
+        group_applications AS g
+        LEFT JOIN activities AS a
+        ON g.activity_id = a.activity_id
+        LEFT JOIN clubs AS c
+        ON a.club_id = c.club_id
+        LEFT JOIN places AS p
+        ON a.place_id=p.place_id
+        WHERE a.club_id = #{activity.clubId}
+        ORDER BY g.group_application_status DESC,g.createtime DESC
+        LIMIT #{start},#{length}
+    </select>
+    <!--查询数据总数-->
+    <select id="dataTableCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        group_applications AS g
+        LEFT JOIN activities AS a
+        ON g.activity_id = a.activity_id
+        LEFT JOIN clubs AS c
+        ON a.club_id = c.club_id
+        LEFT JOIN places AS p
+        ON a.place_id=p.place_id
+        WHERE a.club_id = #{clubId}
+    </select>
+    <!--通过id查询-->
+    <select id="getById" resultType="com.shp.domain.Activity">
+        SELECT
+        <include refid="activityClumn"></include>
+        FROM
+        activities
+        WHERE
+        activity_id = #{id}
+    </select>
+
+    <!--插入数据-->
+    <insert id="save">
+        INSERT INTO
+        activities(place_id, club_id, name, time, place, content)
+        Values (
+        #{placeId},#{clubId},#{name},#{time},#{place},#{content}
+        )
+    </insert>
+    <!--删除(批量更新状态)-->
+    <delete id="deleteMulti">
+        DELETE
+        FROM activities
+        WHERE activity_id IN
+        <foreach collection="array" open="(" close=")" separator="," item="activityId">
+            #{activityId}
+        </foreach>
+    </delete>
+    <!--修改-->
+    <update id="update">
+        UPDATE
+          activities
+        SET
+          place_id = #{placeId},
+          name = #{name},
+          time = #{time},
+          place = #{place},
+          content = #{content}
+        WHERE activity_id = #{activityId}
+    </update>
+    <!--根据实体类查询,用于新建活动加入申请-->
+    <select id="getByEntity" resultType="com.shp.domain.Activity">
+        SELECT
+        <include refid="activityClumn"/>
+        FROM activities
+        <where>
+            <if test="placeId != null and placeId != ''">
+                AND place_id LIKE concat('%',#{placeId},'%')
+            </if>
+            <if test="clubId != null and clubId != ''">
+                AND club_id LIKE concat('%',#{clubId},'%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="time != null and time != ''">
+                AND time LIKE concat('%',#{time},'%')
+            </if>
+            <if test="place != null and place != ''">
+                AND place LIKE concat('%',#{place},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

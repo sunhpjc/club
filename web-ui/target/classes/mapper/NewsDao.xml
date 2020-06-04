@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shp.web.ui.dao.NewsDao">
+    <sql id="newsClumn">
+        n.news_id AS newsId,
+        c.club_id AS clubId,
+        c.name,
+        n.news_title AS newsTitle,
+        n.news_content AS newsContent,
+        n.createtime,
+        n.updatetime
+    </sql>
+
+    <select id="queryNews" resultType="com.shp.domain.News">
+        SELECT
+        <include refid="newsClumn"/>
+        FROM
+        news AS n
+        LEFT JOIN clubs AS c
+        ON n.club_id = c.club_id
+        where n.news_status = 1
+        ORDER BY n.createtime DESC
+    </select>
+
+    <!--通过id查询-->
+    <select id="getById" resultType="com.shp.domain.News">
+        SELECT
+        <include refid="newsClumn"/>
+        FROM
+        news AS n
+        LEFT JOIN clubs AS c
+        ON n.club_id = c.club_id
+        where news_id = #{id} and n.news_status =1
+    </select>
+</mapper>

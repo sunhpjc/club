@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shp.web.admin.dao.UserClubDao">
+    <sql id="userClumn">
+        user_id AS userId,
+        user_email AS userEmail,
+        user_phone AS userPhone,
+        user_password AS userPassword,
+        user_name AS userName,
+        user_img AS userImg,
+        real_name AS realName,
+        sex,
+        number,
+        college,
+        major,
+        user_status AS userStatus,
+        createtime,
+        updatetime
+    </sql>
+    <!--添加-->
+    <insert id="save">
+        INSERT INTO user_club (
+            club_id,
+            user_id
+        )
+        VALUES
+            (#{param1},#{param2})
+    </insert>
+
+    <!--删除-->
+    <delete id="delete">
+        DELETE
+        FROM user_club
+        WHERE club_id = #{param1} AND user_id = #{param2}
+    </delete>
+
+    <!--修改社团星级-->
+    <update id="updateStar">
+        update clubs
+        set star = #{param2}
+        where club_id = #{param1}
+    </update>
+</mapper>
